@@ -1,4 +1,5 @@
 import unittest
+import smtplib
 
 import requests
 
@@ -56,3 +57,25 @@ class TestHTTPS(unittest.TestCase):
         r = requests.get('https://things.toerb.de/test.txt')
         self.assertTrue(r.ok)
         self.assertEqual(r.text, 'success')
+
+
+class TestMail(unittest.TestCase):
+    def test_smtp(self):
+        with smtplib.SMTP('rudi-vm.toerb.de') as smtp:
+            status, message = smtp.noop()
+            self.assertEqual(status, 250)
+            self.assertEqual(message, b'2.0.0 Ok')
+
+            status, message = smtp.ehlo('example.com')
+            self.assertEqual(status, 250)
+            self.assertEqual(message, b'rudi-vm.toerb.de\nPIPELINING\nSIZE 102400000\nETRN\nSTARTTLS\nAUTH PLAIN LOGIN\nAUTH=PLAIN LOGIN\nENHANCEDSTATUSCODES\n8BITMIME\nDSN\nCHUNKING')
+
+            with self.assertRaises(smtplib.SMTPRecipientsRefused) as cm:
+                smtp.sendmail('test@example.com', 'test@example.de', 'Test Message')
+                self.assertEqual(cm.exception, {'test@example.de': (554, b'5.7.1 <test@example.de>: Relay access denied')})
+
+            with self.assertRaises(smtplib.SMTPRecipientsRefused) as cm:
+                smtp.sendmail('test@toerb.de', 'info@toerb.de', 'Test Message')
+                status, message = cm.exception.get('info@toerb.de')
+                self.assertEqual(status, 550)
+                self.assertIn('<info@toerb.de>: Recipient address rejected', message)
