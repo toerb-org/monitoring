@@ -68,7 +68,7 @@ class TestMail(unittest.TestCase):
 
             status, message = smtp.ehlo('example.com')
             self.assertEqual(status, 250)
-            self.assertEqual(message, b'rudi-vm.toerb.de\nPIPELINING\nSIZE 102400000\nETRN\nSTARTTLS\nAUTH PLAIN LOGIN\nAUTH=PLAIN LOGIN\nENHANCEDSTATUSCODES\n8BITMIME\nDSN\nCHUNKING')
+            self.assertIn('rudi-vm.toerb.de', message.decode('utf-8'))
 
             with self.assertRaises(smtplib.SMTPRecipientsRefused) as cm:
                 smtp.sendmail('test@example.com', 'test@example.de', 'Test Message')
