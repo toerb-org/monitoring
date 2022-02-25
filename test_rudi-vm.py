@@ -112,11 +112,11 @@ class TestMail(unittest.TestCase):
         with imaplib.IMAP4_SSL('rudi-vm.toerb.de', port=993) as imap:
             status, message = imap.noop()
             self.assertEqual(status, 'OK')
-            self.assertEqual(message, b'NOOP completed.')
+            self.assertEqual(message, [b'NOOP completed.'])
 
             status, message = imap.capability()
             self.assertEqual(status, 'OK')
-            self.assertEqual(message, b'IMAP4rev1 SASL-IR LOGIN-REFERRALS ID ENABLE IDLE LITERAL+ AUTH=PLAIN AUTH=LOGIN')
+            self.assertEqual(message, [b'IMAP4rev1 SASL-IR LOGIN-REFERRALS ID ENABLE IDLE LITERAL+ AUTH=PLAIN AUTH=LOGIN'])
 
             with self.assertRaises(imaplib.IMAP4.error) as cm:
                 imap.login(user='user', password='password')
