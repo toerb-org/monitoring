@@ -60,13 +60,37 @@ class TestHTTPS(unittest.TestCase):
 
 
 class TestMail(unittest.TestCase):
-    def test_smtp(self):
+    def test_smtp_25(self):
         with smtplib.SMTP('rudi-vm.toerb.de') as smtp:
             status, message = smtp.noop()
             self.assertEqual(status, 250)
             self.assertEqual(message, b'2.0.0 Ok')
 
-            status, message = smtp.ehlo('example.com')
+            status, message = smtp.ehlo()
+            self.assertEqual(status, 250)
+            self.assertIn('rudi-vm.toerb.de', message.decode('utf-8'))
+
+            status, message = smtp.starttls()
+            self.assertEqual(status, 220)
+            self.assertEqual(message, b'2.0.0 Ready to start TLS')
+
+            with self.assertRaises(smtplib.SMTPRecipientsRefused) as cm:
+                smtp.sendmail('test@example.com', 'test@example.de', 'Test Message')
+                self.assertEqual(cm.exception, {'test@example.de': (554, b'5.7.1 <test@example.de>: Relay access denied')})
+
+            with self.assertRaises(smtplib.SMTPRecipientsRefused) as cm:
+                smtp.sendmail('test@toerb.de', 'info@toerb.de', 'Test Message')
+                status, message = cm.exception.get('info@toerb.de')
+                self.assertEqual(status, 550)
+                self.assertIn('<info@toerb.de>: Recipient address rejected', message)
+
+    def test_smtp_465(self):
+        with smtplib.SMTP_SSL('rudi-vm.toerb.de', port=465) as smtp:
+            status, message = smtp.noop()
+            self.assertEqual(status, 250)
+            self.assertEqual(message, b'2.0.0 Ok')
+
+            status, message = smtp.ehlo()
             self.assertEqual(status, 250)
             self.assertIn('rudi-vm.toerb.de', message.decode('utf-8'))
 
