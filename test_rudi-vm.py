@@ -1,3 +1,4 @@
+import imaplib
 import unittest
 import smtplib
 
@@ -60,8 +61,8 @@ class TestHTTPS(unittest.TestCase):
 
 
 class TestMail(unittest.TestCase):
-    def test_smtp_25(self):
-        with smtplib.SMTP('rudi-vm.toerb.de') as smtp:
+    def test_smtp_25(self, port=25):
+        with smtplib.SMTP('rudi-vm.toerb.de', port=port) as smtp:
             status, message = smtp.noop()
             self.assertEqual(status, 250)
             self.assertEqual(message, b'2.0.0 Ok')
@@ -103,3 +104,20 @@ class TestMail(unittest.TestCase):
                 status, message = cm.exception.get('info@toerb.de')
                 self.assertEqual(status, 550)
                 self.assertIn('<info@toerb.de>: Recipient address rejected', message)
+
+    def test_smtp_587(self):
+        self.test_smtp_25(port=587)
+
+    def test_imap_993(self):
+        with imaplib.IMAP4_SSL('rudi-vm.toerb.de', port=993) as imap:
+            status, message = imap.noop()
+            self.assertEqual(status, 'OK')
+            self.assertEqual(message, b'NOOP completed.')
+
+            status, message = imap.capability()
+            self.assertEqual(status, 'OK')
+            self.assertEqual(message, b'IMAP4rev1 SASL-IR LOGIN-REFERRALS ID ENABLE IDLE LITERAL+ AUTH=PLAIN AUTH=LOGIN')
+
+            with self.assertRaises(imaplib.IMAP4.error) as cm:
+                imap.login(user='user', password='password')
+                self.assertEqual(cm.exception, b'[AUTHENTICATIONFAILED] Authentication failed.')
