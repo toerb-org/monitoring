@@ -2,6 +2,7 @@ import imaplib
 import unittest
 import smtplib
 
+import pydnsbl
 import requests
 
 
@@ -121,3 +122,26 @@ class TestMail(unittest.TestCase):
             with self.assertRaises(imaplib.IMAP4.error) as cm:
                 imap.login(user='user', password='password')
                 self.assertEqual(cm.exception, b'[AUTHENTICATIONFAILED] Authentication failed.')
+
+    def test_blacklists(self):
+        domain_checker = pydnsbl.DNSBLDomainChecker()
+        r = domain_checker.check('toerb.de')
+        self.assertFalse(r.blacklisted)
+        self.assertEqual(r.detected_by, {})
+        r = domain_checker.check('tobiasgross.eu')
+        self.assertFalse(r.blacklisted)
+        self.assertEqual(r.detected_by, {})
+        r = domain_checker.check('mielie.de')
+        self.assertFalse(r.blacklisted)
+        self.assertEqual(r.detected_by, {})
+        r = domain_checker.check('mariesalm.de')
+        self.assertFalse(r.blacklisted)
+        self.assertEqual(r.detected_by, {})
+
+        ip_checker = pydnsbl.DNSBLIpChecker()
+        r = ip_checker.check('148.251.52.208')
+        self.assertFalse(r.blacklisted)
+        self.assertEqual(r.detected_by, {})
+        r = ip_checker.check('2a01:4f8:202:12cc:5054:ff:fe12:3480')
+        self.assertFalse(r.blacklisted)
+        self.assertEqual(r.detected_by, {})
