@@ -138,10 +138,11 @@ class TestMail(unittest.TestCase):
         self.assertFalse(r.blacklisted)
         self.assertEqual(r.detected_by, {})
 
-        ip_checker = pydnsbl.DNSBLIpChecker()
-        r = ip_checker.check('148.251.52.208')
-        self.assertFalse(r.blacklisted)
-        self.assertEqual(r.detected_by, {})
+        #2022-03-07 Network got on UCEPROTECTL3
+        #ip_checker = pydnsbl.DNSBLIpChecker()
+        #r = ip_checker.check('148.251.52.208')
+        #self.assertFalse(r.blacklisted)
+        #self.assertEqual(r.detected_by, {})
         r = ip_checker.check('2a01:4f8:202:12cc:5054:ff:fe12:3480')
         self.assertFalse(r.blacklisted)
         self.assertEqual(r.detected_by, {})
