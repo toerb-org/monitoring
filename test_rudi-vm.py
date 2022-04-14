@@ -52,6 +52,10 @@ class TestHTTPS(unittest.TestCase):
         self.assertTrue(r.ok)
         self.assertIn('mariesalm.de', r.text)
 
+        r = requests.get('https://mariesalm.de/publications', allow_redirects=False)
+        self.assertEqual(r.status_code, 302)
+        self.assertEqual(r.headers['Location'], 'https://www.iaas.uni-stuttgart.de/institut/team/Salm/')
+
         r = requests.get('https://www.mariesalm.de/')
         self.assertTrue(r.ok)
         self.assertIn('mariesalm.de', r.text)
