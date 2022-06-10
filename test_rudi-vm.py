@@ -142,7 +142,7 @@ class TestMail(unittest.TestCase):
         self.assertFalse(r.blacklisted)
         self.assertEqual(r.detected_by, {})
 
-        providers = [provider for provider in pydnsbl.providers.BASE_PROVIDERS if provider.host != 'dnsbl-3.uceprotect.net' or provider.host != 'dnsbl-2.uceprotect.net']
+        providers = [provider for provider in pydnsbl.providers.BASE_PROVIDERS if provider.host != 'dnsbl-3.uceprotect.net' and provider.host != 'dnsbl-2.uceprotect.net']
         ip_checker = pydnsbl.DNSBLIpChecker(providers=providers)
         r = ip_checker.check('148.251.52.208')
         self.assertFalse(r.blacklisted)
